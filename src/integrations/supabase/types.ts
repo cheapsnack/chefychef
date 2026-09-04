@@ -56,30 +56,45 @@ export type Database = {
       recipes: {
         Row: {
           cuisine: string
+          diet: string | null
+          difficulty: string | null
           id: string
           ingredients: Json
           instructions: string
+          meal_type: string | null
           name: string
           prep_time_minutes: number
+          region: string | null
           servings: number
+          spice_level: string | null
         }
         Insert: {
           cuisine: string
+          diet?: string | null
+          difficulty?: string | null
           id?: string
           ingredients: Json
           instructions: string
+          meal_type?: string | null
           name: string
           prep_time_minutes: number
+          region?: string | null
           servings?: number
+          spice_level?: string | null
         }
         Update: {
           cuisine?: string
+          diet?: string | null
+          difficulty?: string | null
           id?: string
           ingredients?: Json
           instructions?: string
+          meal_type?: string | null
           name?: string
           prep_time_minutes?: number
+          region?: string | null
           servings?: number
+          spice_level?: string | null
         }
         Relationships: []
       }
