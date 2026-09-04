@@ -17,7 +17,8 @@ import { daysUntilExpiry } from "@/lib/shelfLife";
 export default function Index() {
   const groceriesState = useGroceries();
   const recipesState = useRecipes();
-  const suggestions = useSuggestions(groceriesState.groceries, recipesState.recipes, 6);
+  // Larger pool so tag filters still leave enough suggestions to show.
+  const suggestions = useSuggestions(groceriesState.groceries, recipesState.recipes, 24);
 
   const expiringSoon = groceriesState.active.filter((g) => daysUntilExpiry(g.expiry_date) <= 3).length;
 

@@ -64,6 +64,11 @@ export interface Recipe {
   servings: number;
   instructions: string;
   ingredients: RecipeIngredient[];
+  meal_type?: string | null;
+  diet?: string | null;
+  region?: string | null;
+  difficulty?: string | null;
+  spice_level?: string | null;
 }
 
 export interface MatchedIngredient {
