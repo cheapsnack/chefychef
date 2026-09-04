@@ -103,7 +103,7 @@ export const updateGroceryFn = createServerFn({ method: "POST" })
     const kitchenId = await getKitchenId();
     const { data: row, error } = await (await admin())
       .from("groceries")
-      .update(data.patch)
+      .update(data.patch as never)
       .eq("id", data.id)
       .eq("owner_key", kitchenId)
       .select(GROCERY_COLUMNS)
