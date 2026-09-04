@@ -22,6 +22,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          owner_key: string
           purchase_date: string
           quantity: number | null
           unit: string | null
@@ -34,6 +35,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          owner_key: string
           purchase_date?: string
           quantity?: number | null
           unit?: string | null
@@ -46,6 +48,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          owner_key?: string
           purchase_date?: string
           quantity?: number | null
           unit?: string | null
