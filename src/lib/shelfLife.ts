@@ -26,7 +26,7 @@ export function toISODate(d: Date): string {
 /** Parse a YYYY-MM-DD string into a local-midnight Date. */
 export function parseISODate(s: string): Date {
   const [y, m, d] = s.slice(0, 10).split("-").map(Number);
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
 }
 
 export function todayISO(): string {

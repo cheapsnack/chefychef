@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 interface FormFieldContextValue {
   id: string;
-  error?: string;
+  error?: string | undefined;
 }
 
 const FormFieldContext = React.createContext<FormFieldContextValue | null>(null);
@@ -29,7 +29,7 @@ function useFormField() {
   };
 }
 
-function FormField({ name, error, children }: { name: string; error?: string; children: React.ReactNode }) {
+function FormField({ name, error, children }: { name: string; error?: string | undefined; children: React.ReactNode }) {
   const reactId = React.useId();
   const value = React.useMemo(() => ({ id: `${name}-${reactId}`, error }), [name, reactId, error]);
   return <FormFieldContext.Provider value={value}>{children}</FormFieldContext.Provider>;
