@@ -41,6 +41,13 @@ export function RecipeCard({ suggestion, rank, onView }: RecipeCardProps) {
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="h-3.5 w-3.5" /> {recipe.prep_time_minutes} min · serves {recipe.servings}
         </div>
+        {(recipe.diet || recipe.meal_type || recipe.spice_level) && (
+          <div className="flex flex-wrap gap-1.5">
+            {recipe.diet && <Badge variant="secondary" className="text-xs capitalize">{recipe.diet}</Badge>}
+            {recipe.meal_type && <Badge variant="outline" className="text-xs capitalize">{recipe.meal_type}</Badge>}
+            {recipe.spice_level && <Badge variant="outline" className="text-xs capitalize">{recipe.spice_level} spice</Badge>}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="flex-1 space-y-3">
