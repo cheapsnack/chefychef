@@ -78,17 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Smart Meal Planner — Cook what's expiring first" },
+      { title: "ChefyChef Smart Meal Planner — Cook what's expiring first" },
       {
         name: "description",
         content:
-          "Track your groceries, see what's expiring soon, and get recipe suggestions that use up your food before it goes to waste.",
+          "ChefyChef helps you track your groceries, see what's expiring soon, and get recipe suggestions that use up your food before it goes to waste.",
       },
-      { property: "og:title", content: "Smart Meal Planner — Cook what's expiring first" },
+      { property: "og:title", content: "ChefyChef Smart Meal Planner — Cook what's expiring first" },
       {
         property: "og:description",
         content:
-          "Track your groceries, see what's expiring soon, and get recipe suggestions that use up your food before it goes to waste.",
+          "ChefyChef helps you track your groceries, see what's expiring soon, and get recipe suggestions that use up your food before it goes to waste.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

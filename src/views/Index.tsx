@@ -31,7 +31,7 @@ export default function Index() {
               <Leaf className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Smart Meal Planner</h1>
+              <h1 className="text-xl font-bold tracking-tight">ChefyChef Smart Meal Planner</h1>
               <p className="text-sm text-muted-foreground">Cook what&apos;s expiring first. Waste less.</p>
             </div>
           </div>
