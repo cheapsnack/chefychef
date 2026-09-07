@@ -2,7 +2,7 @@
 
 Log your groceries, track what's about to expire, and get recipe suggestions ranked by how well they use up ingredients before they go bad. Built to cut food waste, not just to list recipes.
 
-Live app: https://chefychef.imranmn.life
+Live app: https://chefychef.lovable.app
 
 ![Color-coded grocery list sorted by expiry](public/screenshots/grocery-list.png)
 
