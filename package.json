@@ -1,5 +1,10 @@
 {
-  "name": "tanstack_start_ts",
+  "name": "chefychef",
+  "description": "Chefychef — a smart meal planner that tracks grocery expiry dates and suggests recipes ranked by food-waste urgency.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cheapsnack/chefychef"
+  },
   "private": true,
   "sideEffects": false,
   "type": "module",
