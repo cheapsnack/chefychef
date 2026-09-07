@@ -4,6 +4,10 @@ Log your groceries, track what's about to expire, and get recipe suggestions ran
 
 Live app: https://chefychef.imranmn.life
 
+![Color-coded grocery list sorted by expiry](public/screenshots/grocery-list.png)
+
+![Recipe suggestions ranked by food-waste urgency](public/screenshots/suggestions.png)
+
 ## Features
 
 - **Log groceries** — name, category, quantity, unit, purchase date, and an optional expiry date.
