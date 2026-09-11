@@ -36,6 +36,12 @@ export default function Index() {
   const wasteTotal = groceriesState.used.length + wasted;
   const wastePct = wasteTotal > 0 ? Math.round((usedInTime / wasteTotal) * 100) : 0;
 
+  /** Toggles several groceries at once through the existing per-item server call. */
+  const markManyUsed = async (ids: string[], used: boolean) => {
+    await Promise.all(ids.map((id) => groceriesState.setUsed(id, used)));
+  };
+
+
 
   return (
     <div className="min-h-screen">
