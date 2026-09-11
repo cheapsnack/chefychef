@@ -255,7 +255,7 @@ export function SuggestionsList({
         )}
       </CardContent>
 
-      <RecipeDialog suggestion={selected} open={open} onOpenChange={setOpen} />
+      <RecipeDialog suggestion={selected} open={open} onOpenChange={setOpen} onMarkUsed={onMarkUsed} />
     </Card>
   );
 }
