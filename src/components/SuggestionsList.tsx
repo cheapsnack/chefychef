@@ -208,14 +208,34 @@ export function SuggestionsList({
           <EmptyState
             icon={<Sparkles className="h-6 w-6" />}
             title="No great matches yet — try logging a few more staple ingredients."
-            body="Eggs, onion, garlic, rice, pasta, tomato and cheese unlock a lot of recipes."
+            body={
+              onAdd ? (
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {QUICK_ADD.map((item) => (
+                    <Button
+                      key={item.name}
+                      variant="outline"
+                      size="sm"
+                      className="capitalize"
+                      disabled={adding !== null}
+                      onClick={() => void quickAdd(item)}
+                    >
+                      <Plus /> {item.name}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                "Eggs, onion, garlic, rice, pasta, tomato and cheese unlock a lot of recipes."
+              )
+            }
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<SlidersHorizontal className="h-6 w-6" />}
             title="No suggestions match these filters"
-            body="Try loosening a filter or clearing them to see all ranked suggestions."
+            body="None of your ranked suggestions carry this combination of tags. Try loosening or clearing a filter."
           />
+
         ) : (
           <>
             {filtersActive && (
