@@ -95,7 +95,10 @@ export default function Index() {
             hasActiveGroceries={groceriesState.active.length > 0}
             loading={groceriesState.loading || recipesState.loading}
             error={recipesState.error}
+            onMarkUsed={markManyUsed}
+            onAdd={groceriesState.addGrocery}
           />
+
         </section>
       </main>
 
