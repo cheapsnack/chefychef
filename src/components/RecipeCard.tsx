@@ -4,6 +4,8 @@ import { AlertTriangle, BookOpen, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 import type { Suggestion } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +22,11 @@ const CUISINE_COLORS: Record<string, string> = {
   Indian: "bg-orange-100 text-orange-800 border-orange-200",
   Mediterranean: "bg-cyan-100 text-cyan-800 border-cyan-200",
   Mexican: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  Chinese: "bg-rose-100 text-rose-800 border-rose-200",
+  Thai: "bg-lime-100 text-lime-800 border-lime-200",
+  "Middle Eastern": "bg-purple-100 text-purple-800 border-purple-200",
 };
+
 
 export function RecipeCard({ suggestion, rank, onView }: RecipeCardProps) {
   const { recipe, reason, matched_expiring_ingredients, matched_ingredients, missing_ingredients, score } = suggestion;
@@ -35,7 +41,16 @@ export function RecipeCard({ suggestion, rank, onView }: RecipeCardProps) {
           <Badge variant="outline" className={cn(CUISINE_COLORS[recipe.cuisine] ?? "")}>
             {recipe.cuisine}
           </Badge>
-          <span className="text-xs text-muted-foreground">#{rank} · score {score}</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* score is a debug-ish signal, so it lives in a tooltip on the rank */}
+                <span className="cursor-help text-xs text-muted-foreground">#{rank}</span>
+              </TooltipTrigger>
+              <TooltipContent>Match score {score}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
         </div>
         <CardTitle className="text-lg leading-snug">{recipe.name}</CardTitle>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">

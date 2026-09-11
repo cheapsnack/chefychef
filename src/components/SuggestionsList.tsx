@@ -1,24 +1,39 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChefHat, SlidersHorizontal, Sparkles, X } from "lucide-react";
+import { ChefHat, Plus, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RecipeCard } from "@/components/RecipeCard";
 import { RecipeDialog } from "@/components/RecipeDialog";
-import type { Suggestion } from "@/lib/types";
+import { toast } from "@/components/ui/sonner";
+import { SHELF_LIFE_DAYS, todayISO } from "@/lib/shelfLife";
+import type { Grocery, GroceryCategory, NewGrocery, Suggestion } from "@/lib/types";
 
 interface SuggestionsListProps {
   suggestions: Suggestion[];
   hasActiveGroceries: boolean;
   loading: boolean;
   error: string | null;
+  onMarkUsed?: (ids: string[], used: boolean) => Promise<void>;
+  onAdd?: (input: NewGrocery) => Promise<Grocery>;
 }
 
 const ALL = "all";
 const DISPLAY_COUNT = 6;
+
+/** Staples that unlock the most recipes, with a sensible default category each. */
+const QUICK_ADD: { name: string; category: GroceryCategory }[] = [
+  { name: "eggs", category: "dairy" },
+  { name: "onion", category: "produce" },
+  { name: "garlic", category: "produce" },
+  { name: "rice", category: "pantry" },
+  { name: "pasta", category: "pantry" },
+  { name: "tomato", category: "produce" },
+  { name: "cheese", category: "dairy" },
+];
 
 interface Filters {
   diet: string;
@@ -28,12 +43,12 @@ interface Filters {
 
 const EMPTY_FILTERS: Filters = { diet: ALL, mealType: ALL, spice: ALL };
 
-function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body?: string }) {
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
       <div className="mb-3 rounded-full bg-accent p-3 text-accent-foreground">{icon}</div>
       <p className="font-medium">{title}</p>
-      {body && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{body}</p>}
+      {body && <div className="mt-1 max-w-sm text-sm text-muted-foreground">{body}</div>}
     </div>
   );
 }
@@ -45,10 +60,20 @@ function label(value: string): string {
     .join(" ");
 }
 
-export function SuggestionsList({ suggestions, hasActiveGroceries, loading, error }: SuggestionsListProps) {
+
+export function SuggestionsList({
+  suggestions,
+  hasActiveGroceries,
+  loading,
+  error,
+  onMarkUsed,
+  onAdd,
+}: SuggestionsListProps) {
   const [selected, setSelected] = useState<Suggestion | null>(null);
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [adding, setAdding] = useState<string | null>(null);
+
 
   // Build dropdown options from whatever tags exist in the suggestion pool.
   const options = useMemo(() => {
@@ -64,6 +89,8 @@ export function SuggestionsList({ suggestions, hasActiveGroceries, loading, erro
   const filtersActive =
     filters.diet !== ALL || filters.mealType !== ALL || filters.spice !== ALL;
 
+  // Filters run over the FULL ranked list (Index passes every ranked suggestion,
+  // not just the top slice), and only then do we take the top DISPLAY_COUNT.
   const filtered = useMemo(
     () =>
       suggestions
@@ -82,8 +109,27 @@ export function SuggestionsList({ suggestions, hasActiveGroceries, loading, erro
     setOpen(true);
   };
 
+  const quickAdd = async ({ name, category }: { name: string; category: GroceryCategory }) => {
+    if (!onAdd) return;
+    setAdding(name);
+    try {
+      // quantity 1, today's purchase date, expiry left blank so it's auto-estimated
+      const saved = await onAdd({ name, category, quantity: 1, unit: "pcs", purchase_date: todayISO() });
+      toast.success(`Added ${saved.name}`, {
+        description: `Estimated expiry: ${saved.expiry_date} (${SHELF_LIFE_DAYS[saved.category]}-day ${saved.category} shelf life)`,
+      });
+    } catch (err) {
+      toast.error("Couldn't add grocery", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setAdding(null);
+    }
+  };
+
   const set = (key: keyof Filters) => (value: string) =>
     setFilters((f) => ({ ...f, [key]: value }));
+
 
   const showFilters = hasActiveGroceries && !loading && suggestions.length > 0 && !error;
 
@@ -162,14 +208,34 @@ export function SuggestionsList({ suggestions, hasActiveGroceries, loading, erro
           <EmptyState
             icon={<Sparkles className="h-6 w-6" />}
             title="No great matches yet — try logging a few more staple ingredients."
-            body="Eggs, onion, garlic, rice, pasta, tomato and cheese unlock a lot of recipes."
+            body={
+              onAdd ? (
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {QUICK_ADD.map((item) => (
+                    <Button
+                      key={item.name}
+                      variant="outline"
+                      size="sm"
+                      className="capitalize"
+                      disabled={adding !== null}
+                      onClick={() => void quickAdd(item)}
+                    >
+                      <Plus /> {item.name}
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                "Eggs, onion, garlic, rice, pasta, tomato and cheese unlock a lot of recipes."
+              )
+            }
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<SlidersHorizontal className="h-6 w-6" />}
             title="No suggestions match these filters"
-            body="Try loosening a filter or clearing them to see all ranked suggestions."
+            body="None of your ranked suggestions carry this combination of tags. Try loosening or clearing a filter."
           />
+
         ) : (
           <>
             {filtersActive && (
@@ -189,7 +255,7 @@ export function SuggestionsList({ suggestions, hasActiveGroceries, loading, erro
         )}
       </CardContent>
 
-      <RecipeDialog suggestion={selected} open={open} onOpenChange={setOpen} />
+      <RecipeDialog suggestion={selected} open={open} onOpenChange={setOpen} onMarkUsed={onMarkUsed} />
     </Card>
   );
 }
