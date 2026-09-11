@@ -1,7 +1,9 @@
 "use client";
 
-import { Clock, Users } from "lucide-react";
+import { useState } from "react";
+import { ClipboardList, Clock, CookingPot, Loader2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "@/components/ui/sonner";
 import type { Suggestion } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -16,19 +20,68 @@ interface RecipeDialogProps {
   suggestion: Suggestion | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Marks several groceries used / unused at once (backed by the existing setUsed server call). */
+  onMarkUsed?: (ids: string[], used: boolean) => Promise<void>;
 }
 
-export function RecipeDialog({ suggestion, open, onOpenChange }: RecipeDialogProps) {
+export function RecipeDialog({ suggestion, open, onOpenChange, onMarkUsed }: RecipeDialogProps) {
+  const [cooking, setCooking] = useState(false);
+
   if (!suggestion) return null;
-  const { recipe, matched_ingredients, matched_expiring_ingredients } = suggestion;
+  const { recipe, matched_ingredients, matched_expiring_ingredients, missing_ingredients } = suggestion;
 
   const matchedNames = new Set(matched_ingredients.map((m) => m.ingredient.name));
   const expiringNames = new Set(matched_expiring_ingredients.map((m) => m.ingredient.name));
+
+  // matched_ingredients already contains the expiring matches, but we de-dupe by
+  // grocery id anyway so one grocery matched by two ingredients is only toggled once.
+  const cookTargets = Array.from(
+    new Map(matched_ingredients.map((m) => [m.grocery.id, m.grocery])).values(),
+  );
 
   const steps = recipe.instructions
     .split(/\n+/)
     .map((s) => s.replace(/^\s*\d+[.)]\s*/, "").trim())
     .filter(Boolean);
+
+  const handleCook = async () => {
+    if (cookTargets.length === 0 || !onMarkUsed) return;
+    const ids = cookTargets.map((g) => g.id);
+    const names = cookTargets.map((g) => g.name);
+    setCooking(true);
+    try {
+      await onMarkUsed(ids, true);
+      toast.success(`Marked ${ids.length} item${ids.length === 1 ? "" : "s"} used`, {
+        description: names.join(", "),
+        action: {
+          label: "Undo",
+          onClick: () => {
+            void onMarkUsed(ids, false).catch(() =>
+              toast.error("Couldn't undo", { description: "Please try again." }),
+            );
+          },
+        },
+      });
+    } catch (err) {
+      toast.error("Couldn't mark items used", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setCooking(false);
+    }
+  };
+
+  const handleCopyShoppingList = async () => {
+    const text = missing_ingredients.map((ing) => `${ing.quantity_text} ${ing.name}`).join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Shopping list copied", {
+        description: `${missing_ingredients.length} ingredient${missing_ingredients.length === 1 ? "" : "s"}`,
+      });
+    } catch {
+      toast.error("Couldn't copy", { description: "Your browser blocked clipboard access." });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,6 +99,32 @@ export function RecipeDialog({ suggestion, open, onOpenChange }: RecipeDialogPro
           <DialogTitle className="text-2xl">{recipe.name}</DialogTitle>
           <DialogDescription>{suggestion.reason}</DialogDescription>
         </DialogHeader>
+
+        <div className="flex flex-wrap gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              {/* span wrapper: a disabled button doesn't emit the events the tooltip needs */}
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Button onClick={handleCook} disabled={cookTargets.length === 0 || cooking}>
+                    {cooking ? <Loader2 className="animate-spin" /> : <CookingPot />} Cook this
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {cookTargets.length === 0
+                  ? "You don't have any of these ingredients logged yet."
+                  : `Marks ${cookTargets.length} matched grocer${cookTargets.length === 1 ? "y" : "ies"} as used.`}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {missing_ingredients.length > 0 && (
+            <Button variant="outline" onClick={handleCopyShoppingList}>
+              <ClipboardList /> Copy shopping list
+            </Button>
+          )}
+        </div>
 
         <div className="grid gap-6 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <section>
