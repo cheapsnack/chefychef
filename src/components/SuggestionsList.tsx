@@ -61,10 +61,19 @@ function label(value: string): string {
 }
 
 
-export function SuggestionsList({ suggestions, hasActiveGroceries, loading, error }: SuggestionsListProps) {
+export function SuggestionsList({
+  suggestions,
+  hasActiveGroceries,
+  loading,
+  error,
+  onMarkUsed,
+  onAdd,
+}: SuggestionsListProps) {
   const [selected, setSelected] = useState<Suggestion | null>(null);
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [adding, setAdding] = useState<string | null>(null);
+
 
   // Build dropdown options from whatever tags exist in the suggestion pool.
   const options = useMemo(() => {
