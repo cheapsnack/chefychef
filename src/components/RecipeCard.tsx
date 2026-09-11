@@ -20,7 +20,11 @@ const CUISINE_COLORS: Record<string, string> = {
   Indian: "bg-orange-100 text-orange-800 border-orange-200",
   Mediterranean: "bg-cyan-100 text-cyan-800 border-cyan-200",
   Mexican: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  Chinese: "bg-rose-100 text-rose-800 border-rose-200",
+  Thai: "bg-lime-100 text-lime-800 border-lime-200",
+  "Middle Eastern": "bg-purple-100 text-purple-800 border-purple-200",
 };
+
 
 export function RecipeCard({ suggestion, rank, onView }: RecipeCardProps) {
   const { recipe, reason, matched_expiring_ingredients, matched_ingredients, missing_ingredients, score } = suggestion;
