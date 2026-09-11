@@ -17,10 +17,25 @@ import { daysUntilExpiry } from "@/lib/shelfLife";
 export default function Index() {
   const groceriesState = useGroceries();
   const recipesState = useRecipes();
-  // Larger pool so tag filters still leave enough suggestions to show.
-  const suggestions = useSuggestions(groceriesState.groceries, recipesState.recipes, 24);
+  // Full ranked list: filters in SuggestionsList apply to everything, then it shows the top 6.
+  const suggestions = useSuggestions(
+    groceriesState.groceries,
+    recipesState.recipes,
+    Math.max(recipesState.recipes.length, 1),
+  );
 
   const expiringSoon = groceriesState.active.filter((g) => daysUntilExpiry(g.expiry_date) <= 3).length;
+
+  // Waste-reduced stat, computed client-side only. There's no "marked used at"
+  // timestamp on a grocery, so we treat today as the used date: an item counts as
+  // "used in time" when it hasn't passed its expiry date. The denominator adds
+  // still-active items that are already past expiry (effectively wasted).
+  const today = todayISO();
+  const usedInTime = groceriesState.used.filter((g) => g.expiry_date >= today).length;
+  const wasted = groceriesState.active.filter((g) => g.expiry_date < today).length;
+  const wasteTotal = groceriesState.used.length + wasted;
+  const wastePct = wasteTotal > 0 ? Math.round((usedInTime / wasteTotal) * 100) : 0;
+
 
   return (
     <div className="min-h-screen">
