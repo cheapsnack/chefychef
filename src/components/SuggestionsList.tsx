@@ -1,24 +1,39 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChefHat, SlidersHorizontal, Sparkles, X } from "lucide-react";
+import { ChefHat, Plus, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RecipeCard } from "@/components/RecipeCard";
 import { RecipeDialog } from "@/components/RecipeDialog";
-import type { Suggestion } from "@/lib/types";
+import { toast } from "@/components/ui/sonner";
+import { SHELF_LIFE_DAYS, todayISO } from "@/lib/shelfLife";
+import type { Grocery, GroceryCategory, NewGrocery, Suggestion } from "@/lib/types";
 
 interface SuggestionsListProps {
   suggestions: Suggestion[];
   hasActiveGroceries: boolean;
   loading: boolean;
   error: string | null;
+  onMarkUsed?: (ids: string[], used: boolean) => Promise<void>;
+  onAdd?: (input: NewGrocery) => Promise<Grocery>;
 }
 
 const ALL = "all";
 const DISPLAY_COUNT = 6;
+
+/** Staples that unlock the most recipes, with a sensible default category each. */
+const QUICK_ADD: { name: string; category: GroceryCategory }[] = [
+  { name: "eggs", category: "dairy" },
+  { name: "onion", category: "produce" },
+  { name: "garlic", category: "produce" },
+  { name: "rice", category: "pantry" },
+  { name: "pasta", category: "pantry" },
+  { name: "tomato", category: "produce" },
+  { name: "cheese", category: "dairy" },
+];
 
 interface Filters {
   diet: string;
@@ -28,12 +43,12 @@ interface Filters {
 
 const EMPTY_FILTERS: Filters = { diet: ALL, mealType: ALL, spice: ALL };
 
-function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body?: string }) {
+function EmptyState({ icon, title, body }: { icon: React.ReactNode; title: string; body?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center">
       <div className="mb-3 rounded-full bg-accent p-3 text-accent-foreground">{icon}</div>
       <p className="font-medium">{title}</p>
-      {body && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{body}</p>}
+      {body && <div className="mt-1 max-w-sm text-sm text-muted-foreground">{body}</div>}
     </div>
   );
 }
@@ -44,6 +59,7 @@ function label(value: string): string {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 }
+
 
 export function SuggestionsList({ suggestions, hasActiveGroceries, loading, error }: SuggestionsListProps) {
   const [selected, setSelected] = useState<Suggestion | null>(null);
