@@ -7,7 +7,7 @@ import { SuggestionsList } from "@/components/SuggestionsList";
 import { useGroceries } from "@/hooks/useGroceries";
 import { useRecipes } from "@/hooks/useRecipes";
 import { useSuggestions } from "@/hooks/useSuggestions";
-import { daysUntilExpiry } from "@/lib/shelfLife";
+import { daysUntilExpiry, todayISO } from "@/lib/shelfLife";
 
 /**
  * The single main page: composes the three sections in order.
@@ -50,16 +50,26 @@ export default function Index() {
               <p className="text-sm text-muted-foreground">Cook what&apos;s expiring first. Waste less.</p>
             </div>
           </div>
-          {!groceriesState.loading && groceriesState.active.length > 0 && (
+          {!groceriesState.loading && (groceriesState.active.length > 0 || wasteTotal > 0) && (
             <div className="hidden text-right text-sm sm:block">
-              <div className="font-semibold">{groceriesState.active.length} items tracked</div>
-              <div className={expiringSoon > 0 ? "text-orange-700" : "text-muted-foreground"}>
-                {expiringSoon > 0
-                  ? `${expiringSoon} expiring within 3 days`
-                  : "Nothing expiring in the next 3 days"}
-              </div>
+              {groceriesState.active.length > 0 && (
+                <>
+                  <div className="font-semibold">{groceriesState.active.length} items tracked</div>
+                  <div className={expiringSoon > 0 ? "text-orange-700" : "text-muted-foreground"}>
+                    {expiringSoon > 0
+                      ? `${expiringSoon} expiring within 3 days`
+                      : "Nothing expiring in the next 3 days"}
+                  </div>
+                </>
+              )}
+              {wasteTotal > 0 && (
+                <div className="text-green-700">
+                  {usedInTime} of {wasteTotal} items used in time ({wastePct}%)
+                </div>
+              )}
             </div>
           )}
+
         </div>
       </header>
 
