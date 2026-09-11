@@ -89,6 +89,8 @@ export function SuggestionsList({
   const filtersActive =
     filters.diet !== ALL || filters.mealType !== ALL || filters.spice !== ALL;
 
+  // Filters run over the FULL ranked list (Index passes every ranked suggestion,
+  // not just the top slice), and only then do we take the top DISPLAY_COUNT.
   const filtered = useMemo(
     () =>
       suggestions
@@ -107,8 +109,27 @@ export function SuggestionsList({
     setOpen(true);
   };
 
+  const quickAdd = async ({ name, category }: { name: string; category: GroceryCategory }) => {
+    if (!onAdd) return;
+    setAdding(name);
+    try {
+      // quantity 1, today's purchase date, expiry left blank so it's auto-estimated
+      const saved = await onAdd({ name, category, quantity: 1, unit: "pcs", purchase_date: todayISO() });
+      toast.success(`Added ${saved.name}`, {
+        description: `Estimated expiry: ${saved.expiry_date} (${SHELF_LIFE_DAYS[saved.category]}-day ${saved.category} shelf life)`,
+      });
+    } catch (err) {
+      toast.error("Couldn't add grocery", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
+    } finally {
+      setAdding(null);
+    }
+  };
+
   const set = (key: keyof Filters) => (value: string) =>
     setFilters((f) => ({ ...f, [key]: value }));
+
 
   const showFilters = hasActiveGroceries && !loading && suggestions.length > 0 && !error;
 
