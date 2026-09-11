@@ -21,7 +21,7 @@ interface RecipeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Marks several groceries used / unused at once (backed by the existing setUsed server call). */
-  onMarkUsed?: (ids: string[], used: boolean) => Promise<void>;
+  onMarkUsed?: ((ids: string[], used: boolean) => Promise<void>) | undefined;
 }
 
 export function RecipeDialog({ suggestion, open, onOpenChange, onMarkUsed }: RecipeDialogProps) {
